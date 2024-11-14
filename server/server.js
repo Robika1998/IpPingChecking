@@ -16,6 +16,8 @@ const deviceSchema = new mongoose.Schema({
   deviceName: String,
   online: Boolean,
   userId: String,
+  startTime: Date,
+  endTime: Date,
 });
 
 const Device = mongoose.model("Device", deviceSchema);
@@ -57,6 +59,8 @@ const updateDeviceStatuses = async () => {
     if (response.alive) {
       if (!device.online) {
         device.online = true;
+        device.startTime = now;
+        device.endTime = null;
         await new DeviceHistory({
           deviceId: device._id,
           startTime: now,
@@ -65,6 +69,7 @@ const updateDeviceStatuses = async () => {
     } else {
       if (device.online) {
         device.online = false;
+        device.endTime = now;
         await DeviceHistory.findOneAndUpdate(
           { deviceId: device._id, endTime: null },
           { endTime: now }
